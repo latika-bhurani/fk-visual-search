@@ -11,7 +11,10 @@ def sample(verticals, output_path, train=True):
     base_dir = "/data/street2shop"
     meta_dir = os.path.join(base_dir, "meta", "json")
     base_image_dir = os.path.join(base_dir, "structured_images")
+
+    # number of samples
     number_of_n = 100
+
     prefix = "train" if train else "test"
     for vertical in verticals:
         filename = prefix + "_pairs_" + vertical + ".json"
@@ -21,8 +24,12 @@ def sample(verticals, output_path, train=True):
         with open(os.path.join(meta_dir, filename)) as jsonFile:
             pairs = json.load(jsonFile)
         photo_to_product_map = {}
+
         with open(retrieval_path) as jsonFile:
+            # json format : {"photo": 163478, "product": 1}
             data = json.load(jsonFile)
+
+        # product to photo : 1-to-many relation
         for info in data:
             photo_to_product_map[info["photo"]] = info["product"]
         product_to_photo_map = {}
@@ -31,6 +38,8 @@ def sample(verticals, output_path, train=True):
             if product not in product_to_photo_map:
                 product_to_photo_map[product] = set()
             product_to_photo_map[product].add(photo)
+
+        # universe : all photo ids
         universe = [int(os.path.splitext(os.path.basename(x))[0]) for x in
                     glob.glob(image_dir + "/*.jpg")]
         for pair in pairs:
@@ -40,6 +49,8 @@ def sample(verticals, output_path, train=True):
             for i in product_to_photo_map[product]:
                 p_s.append(i)
             triplets = []
+
+            # create triplets of form (query, positive, negative)
             for p in p_s:
                 for j in range(number_of_n):
                     q_id = str(photo)
@@ -49,6 +60,8 @@ def sample(verticals, output_path, train=True):
                     if n not in p_s and n!=photo:
                         n_id = str(n)
                         triplets.append([q_id, p_id, n_id, vertical])
+
+                # write triplets path to csv
                 with open(output_path, "ab") as csvFile:
                     writer = csv.writer(csvFile)
                     triplets = [[os.path.join(query_dir, x[0] + ".jpg"), os.path.join(image_dir, x[1] + ".jpg"),

@@ -16,7 +16,7 @@ from datetime import datetime
 
 
 class FeatureExtractor(object):
-    def __init__(self, path_to_deploy_file, path_to_model_file, input_layer_name="data_q", gpu_mode=True, device_id=1,
+    def __init__(self, path_to_deploy_file, path_to_model_file, input_layer_name="data_q", gpu_mode=False, device_id=1,
                  height=None, width=None):
         self.path_to_deploy_file = path_to_deploy_file
         self.path_to_model_file = path_to_model_file
@@ -50,7 +50,7 @@ class FeatureExtractor(object):
                 img = self.getImageFromPath(path)
                 resized_imgs.append(imresize(img, (self.height, self.width), 'bilinear'))
             except Exception as e:
-                print "Exception for image", path
+                print("Exception for image : "  +path)
                 traceback.print_exc()
 
         transposed_imgs = [np.transpose(x, (2, 0, 1)) for x in resized_imgs]

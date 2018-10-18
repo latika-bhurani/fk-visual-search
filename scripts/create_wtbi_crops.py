@@ -11,7 +11,11 @@ structured_dir = os.path.join(base_dir, "structured_images")
 query_files = glob.glob(meta_dir + "/*_pairs_*.json")
 
 for path in query_files:
+
+    # vertical is the type of apparel e.g. train_pairs_dresses.json : dresses
     vertical = path.split("_")[-1].split(".")[0]
+
+    # wtbi_crop_dir : wtbi_dresses_query_crop/
     wtbi_crop_dir = os.path.join(structured_dir, "wtbi_"+vertical+"_query_crop")
     if not os.path.exists(wtbi_crop_dir):
         os.mkdir(wtbi_crop_dir)
@@ -19,6 +23,8 @@ for path in query_files:
     print("Processing path %s"%(path))
     with open(path) as jsonFile:
         pairs = json.load(jsonFile)
+
+    # json format : {"photo": 2847, "product": 47270, "bbox": {"width": 693, "top": 307, "left": 146, "height": 993}}
     for pair in pairs:
         query_id = pair["photo"]
         bbox = pair["bbox"]
