@@ -26,5 +26,5 @@ if __name__ == "__main__":
     if not os.path.exists(imdir):
         imdir = os.path.join(base_image_dir, vertical)
     image_paths = glob.glob(imdir+"/*.jpg")
-    indexer = Indexer(config, image_paths)
+    indexer = Indexer(config, image_pat hs)
     indexer.index(20)
