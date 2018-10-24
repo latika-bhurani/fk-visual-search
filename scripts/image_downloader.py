@@ -1,11 +1,14 @@
 import os
 import pickle
 import workerpool
-from urlparse import urlparse
+from urllib.parse import urlparse
 import requests
 from PIL import Image
-from StringIO import StringIO
+from io import StringIO
 import traceback
+from pathlib import Path
+
+# data_folder = Path("source_data/text_files/")
 
 
 __author__ = "ananya.h"
@@ -51,23 +54,29 @@ class ParallelImageDownloader(object):
         return errors
 
 if __name__ == "__main__":
-    url_file_path = "/data/street2shop/photos/photos.txt"
-    dst_dir = "/data/street2shop/images/"
-    images_downloaded = os.listdir(dst_dir)
-    ids_downloaded = set([ x.split(".")[0] for x in images_downloaded])
-    with open(url_file_path,'r') as urlFile:
-        lines = urlFile.readlines()
-        lines = [ x.strip() for x in lines]
-        lines = [ x.split(",")[:2] for x in lines]
-    url_objects = {}
-    for line in lines:
-        img_id,url = line
-        img_id = str(int(img_id))
-        if img_id not in ids_downloaded:
-            url_objects[img_id] = URLObject(img_id,url) # Done to remove duplicates
-    url_objects = url_objects.values()
-    print("Commencing downloads for "+str(len(url_objects))+ " urls")
-    downloader = ParallelImageDownloader(25,dst_dir)
-    errors = downloader.download_batch(url_objects)
-    with open("/tmp/errors.pkl","wb") as pklFile:
-        pickle.dump(errors,pklFile)
+    try:
+        # url_file_path = "C:/Users/DarkMatter/Desktop/CS594-AI-Innovations/FlipkartImplemetation/fk-visual-search-master/scripts/photos/photos.txt"
+        # url_file_path = Path("C:/Users/DarkMatter/Desktop/CS594-AI-Innovations/FlipkartImplemetation/fk-visual-search-master/scripts/photos/photos.txt")
+        dst_dir = "C:/Users/DarkMatter/Desktop/CS594-AI-Innovations/FlipkartImplemetation/fk-visual-search-master/scripts/data/street2shop/images"
+        images_downloaded = os.listdir(dst_dir)
+        ids_downloaded = set([ x.split(".")[0] for x in images_downloaded])
+        with open(url_file_path,'r') as urlFile:
+            lines = urlFile.readlines()
+            lines = [ x.strip() for x in lines]
+            lines = [ x.split(",")[:2] for x in lines]
+        url_objects = {}
+        for line in lines:
+            img_id,url = line
+            img_id = str(int(img_id))
+            if img_id not in ids_downloaded:
+                url_objects[img_id] = URLObject(img_id,url) # Done to remove duplicates
+        url_objects = url_objects.values()
+        print("Commencing downloads for "+str(len(url_objects))+ " urls")
+        downloader = ParallelImageDownloader(25,dst_dir)
+        errors = downloader.download_batch(url_objects)
+        with open("/tmp/errors.pkl","wb") as pklFile:
+            pickle.dump(errors,pklFile)
+    except KeyboardInterrupt:
+        print('interrupted')
+        
+    

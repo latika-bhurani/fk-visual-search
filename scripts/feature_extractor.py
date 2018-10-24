@@ -16,7 +16,7 @@ from datetime import datetime
 
 
 class FeatureExtractor(object):
-    def __init__(self, path_to_deploy_file, path_to_model_file, input_layer_name="data_q", gpu_mode=False, device_id=1,
+    def __init__(self, path_to_deploy_file, path_to_model_file, input_layer_name="data_q", gpu_mode=True, device_id=1,
                  height=None, width=None):
         self.path_to_deploy_file = path_to_deploy_file
         self.path_to_model_file = path_to_model_file
@@ -31,9 +31,14 @@ class FeatureExtractor(object):
         self.width = width or self.net.blobs[self.input_layer_name].data.shape[3]
 
     def extract_one(self, img_path, layer):
+        # read colored image
         img = self.getImageFromPath(img_path)
+        # resize image to the height and weight with "bilinear" --> when we have constant image coloring across
         resized_img = imresize(img, (self.height, self.width), 'bilinear')
+
+        #transpose
         transposed_img = np.transpose(resized_img, (2, 0, 1))
+        
         assert self.net.blobs[self.input_layer_name].data.shape == (1,) + transposed_img.shape
         self.net.blobs[self.input_layer_name].data[...] = transposed_img
         self.net.forward()
@@ -50,7 +55,7 @@ class FeatureExtractor(object):
                 img = self.getImageFromPath(path)
                 resized_imgs.append(imresize(img, (self.height, self.width), 'bilinear'))
             except Exception as e:
-                print("Exception for image : "  +path)
+                print "Exception for image", path
                 traceback.print_exc()
 
         transposed_imgs = [np.transpose(x, (2, 0, 1)) for x in resized_imgs]
