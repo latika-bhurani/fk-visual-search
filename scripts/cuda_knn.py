@@ -20,7 +20,10 @@ def construct_fv_map_from_lmdbs(crops_index_path, catalog_index_path):
     catalog_env = lmdb.open(catalog_index_path)
     num_crops = crops_env.stat()["entries"]
     num_catalog = catalog_env.stat()["entries"]
+
+    # only for crops_env
     needed_ids = list()
+
     fv_size = 4097
     data_map = np.zeros((num_crops + num_catalog, fv_size), dtype=np.float32)
     index_id_map = {}
@@ -86,8 +89,10 @@ def compute_nn(index_map, data, fv_size, num_crops, output_db, needed_ids=None, 
                 total_dist += dist * dist;
             }
             output[id] = total_dist;
-        }
+        }   
     }""")
+
+    count = 0
 
     # func = mod.get_function("compute_chi_square_dist")
     func = mod.get_function("compute_l2_dist")
@@ -95,12 +100,14 @@ def compute_nn(index_map, data, fv_size, num_crops, output_db, needed_ids=None, 
     print("Compilation is complete")
     THREADS_PER_BLOCK = 32
     NUMBER_OF_BLOCKS = int(math.ceil(float(n) / float(THREADS_PER_BLOCK)))
-
-    count = 0
     start = time.time()
     for item_id, index in needed_indices.iteritems():
         func.prepared_call((NUMBER_OF_BLOCKS, 1), (THREADS_PER_BLOCK, 1, 1), data_gpu, row_gpu, index, n)
+
+        # copy from row_gpu to row
         cuda.memcpy_dtoh(row, row_gpu)
+
+        # only catalog
         pruned_row = row[num_crops:]
         minIndices = np.argpartition(pruned_row, k)
         nns = zip([index_map[num_crops + x] for x in minIndices[:k]], pruned_row[minIndices[:k]])
