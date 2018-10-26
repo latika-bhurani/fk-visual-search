@@ -16,8 +16,8 @@ def get_features(img_path):
 
 	vgg16_feature = model.predict(img_data)
 
-    vgg16_feature_np = np.array(vgg16_feature)
-    vgg16_feature_flatten = vgg16_feature_np.flatten()
+	vgg16_feature_np = np.array(vgg16_feature)
+	vgg16_feature_flatten = vgg16_feature_np.flatten()
 
 	return vgg16_feature_flatten
 	# print(vgg16_feature.shape)

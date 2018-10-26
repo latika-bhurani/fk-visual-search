@@ -1,3 +1,4 @@
+import tensorflow as tf
 from keras.models import Sequential
 from keras.layers.convolutional import Conv2D
 from keras.layers.convolutional import MaxPooling2D
@@ -12,7 +13,7 @@ from keras.utils import plot_model
 
 
 # from scripts.normalizor import LRN
-import tensorflow as tf
+#import tensorflow as tf
 import keras.backend as K
 from keras.layers import concatenate, Flatten, Input, Lambda
 from keras.applications.vgg16 import preprocess_input
@@ -92,7 +93,7 @@ def build_base_network(triplet_batch):
     print('s1 flatten shape', s1_flat1.shape)
     shallow1_dense = Dense(1536)(s1_flat1)
 
-    print('shallow_1 ', end='\n\n')
+    #print('shallow_1 ', end='\\n\\n')
     # print(shallow_1.summary())
     print(shallow1_dense)
     print(shallow1_dense.shape)
@@ -112,7 +113,7 @@ def build_base_network(triplet_batch):
     shallow2_dense = Dense(1536)(s2_flat1)
 
 
-    print('shallow_2 ', end='\n\n')
+    #print('shallow_2 ', end='\n\n')
 
     print(shallow2_dense)
     print(shallow2_dense.shape)
@@ -162,7 +163,7 @@ def build_base_network(triplet_batch):
 
     # save final model
     fashion_lens_model.fit([query_image, positive_image, negative_image], Y_train, epochs=50, validation_split=0.2)
-    fashion_lens_model.save('.\\model\\fashion_lens_triplet_model.h5')
+    fashion_lens_model.save('./model/fashion_lens_triplet_model.h5')
 
     #
     #
@@ -182,17 +183,23 @@ def build_base_network(triplet_batch):
     ## Extracting features from last layer and saving to database
     model_name = 'vizNet_model'
     layer_name = 'viznet_embedding'
-    extract_feature_model = Model(inputs=fashion_lens_model.input, 
-                                    outputs=fashion_lens_model.get_layer(model_name).get_layer(layer_name).output)
-    feature_vector = extract_feature_model.predict(query_image)
+#    extract_feature_model = Model(inputs=fashion_lens_model.input, 
+#                                    outputs=fashion_lens_model.get_layer(model_name).get_layer(layer_name).output)
+#    feature_vector = extract_feature_model.predict(query_image)
     # feat_vec = features.predict(query_image)
 
+#    print(feature_vector)
+
+#	sme = 'vizNet_model'
+#    layer_name = 'viznet_embedding'
+    # layer_name = 'viznet_embedding/l2_normalize:0'
+    # extract_feature_model = Model(inputs=fashion_lens_model.input, 
+    #                                 outputs=fashion_lens_model.get_layer(model_name).get_layer(layer_name).output)
+    extract_feature_model = Model(inputs=vizNet_model.get_input_at(0), 
+                                    outputs=vizNet_model.get_layer(layer_name).output)
+    feature_vector = extract_feature_model.predict(query_image) 
+
     print(feature_vector)
-
-
-
-    # shallow_dense = 
-
     # TODO
     # combine VGG16  and shallow layer output
     # shallow.add(Dense(4096))
@@ -318,14 +325,18 @@ def create_batch(triplet_csv_path, batch_number, batch_size=20):
 
 
 triplet_csv_path = 'triplets_skirts_10_sample_new2.csv'
-batch_size = 20
+batch_size = 16
 # read images from triplets
-total_train_size = 500 # update it to the shape of the data
+total_train_size = 512 # update it to the shape of the data
 
 
 print("Start training")
 ## testing purpose -- run only 1 batch
-for batch_num in range(1):
-    triplet_batch = create_batch(triplet_csv_path, batch_num, batch_size)
-    build_base_network(triplet_batch)
+#for batch_num in range(32):
+#    triplet_batch = create_batch(triplet_csv_path, batch_num, batch_size)
+#    build_base_network(triplet_batch)
 
+
+from keras.models import load_model
+model = load_model('./model/fashion_lens_triplet_model.h5', custom_objects= {'triplet_loss':triplet_loss,'accuracy':accuracy, 'l2Norm':l2Norm, 'euclidean_distance':euclidean_distance})
+print("Model loaded")
