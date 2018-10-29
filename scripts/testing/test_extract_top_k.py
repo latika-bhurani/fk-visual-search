@@ -3,24 +3,24 @@ import json
 import random
 import csv
 import os
-import create_features_vgg16 as cf
+# import create_features_vgg16 as cf
+from pprint import pprint
 
-__author__ = 'ananya.h'
 
 # dictionary to hold features of the images
 image_feature_map = {}
 
 
 def sample(verticals, output_path, train=True):
-    base_dir = "."
+    base_dir = ".\\"
     meta_dir = os.path.join(base_dir, "meta", "json")
     base_image_dir = os.path.join(base_dir, "structured_images")
     print(base_image_dir)
     # number_of_n = 100
 
-    number_of_n = 100
-#   number_of_pos_neg_pairs = 3 # this will give out 100*10 triplets ##   !!!!!!!!!!!!!!!! update line 69!!!!!!!!!!!!!!!!!!!!
-    prefix = "train" if train else "test"
+    number_of_n = 1
+    number_of_pos_neg_pairs = 10 # this will give out 100*10 triplets ##   !!!!!!!!!!!!!!!! update line 69!!!!!!!!!!!!!!!!!!!!
+    prefix = "train" #if train else "test"
     for vertical in verticals:
         print(vertical)
         # filename = train_pairs_dresses.json
@@ -61,6 +61,24 @@ def sample(verticals, output_path, train=True):
                 product_to_photo_map[product] = set()
             product_to_photo_map[product].add(photo)  # product : set(photos)
 
+        skirts_dir = '.\\structured_images\\skirts\\'
+
+        similar_items = {}
+        similar_items_product_to_photo = {}
+
+        for key, value in product_to_photo_map.items():
+            if len(value)>1:
+                for val in list(value):
+                    if os.path.isfile(os.path.join(skirts_dir, str(val) + '.jpg')):
+                        similar_items_product_to_photo[key] = value
+
+
+        print('printing product to map......', end='\n\n')
+        pprint(product_to_photo_map)
+        print('printing similar items product to map......', end='\n\n')
+        pprint(similar_items_product_to_photo)
+        # exit(0)
+
 
         # list of all the image names in ./structured_images/dresses_256
         universe = [int(os.path.splitext(os.path.basename(x))[0]) for x in
@@ -69,15 +87,32 @@ def sample(verticals, output_path, train=True):
 
         # print(len(pairs))
         # exit(0)
-
-        for pair in pairs:
+        # print(pairs)
+        # exit(0)
+        query_to_similar_photos = {}
+        for pair in pairs[:]:
             photo = pair["photo"]
             product = pair["product"]
             p_s = []
 
+            query_to_similar_photos[photo] = product_to_photo_map[product]
 
+
+        import pickle
+
+        pickle.dump(query_to_similar_photos, open('similar_item_pickle.p', 'wb'))
+
+
+        print('printing alll similar itemsssss. ................................', end='\n\n\n\n')
+        pprint(query_to_similar_photos)
+        exit(0)
+
+'''
             for i in product_to_photo_map[product]:
                 p_s.append(i) # list of all the photos of a product
+
+            pprint(p_s)
+            exit(0)
             
 
             triplets = []
@@ -88,6 +123,12 @@ def sample(verticals, output_path, train=True):
                 for j in range(number_of_n):
                     q_id = str(photo)
                     p_id = str(p)
+
+                    query_to_similar_photos[q_id] = p_id
+
+
+
+
                     n_index = random.randint(0, len(universe) - 1)
                     n = universe[n_index]
                     # n_id is any random photo not in the photos we consider
@@ -106,14 +147,14 @@ def sample(verticals, output_path, train=True):
 
                     count = 0
                     pos_count = 0
-#                    for triplet in triplets:
- #                       if os.path.isfile(os.path.join(query_dir, triplet[0] + '.jpg')) and os.path.isfile(os.path.join(image_dir, triplet[1] + '.jpg')) and os.path.isfile(os.path.join(image_dir, triplet[2] + '.jpg')):
-  #                          if triplet[0] not in image_feature_map:
-  #                              image_feature_map[triplet[0]] = cf.get_features(os.path.join(query_dir, triplet[0] + '.jpg'))
-  #                          if triplet[1] not in image_feature_map:
-  #                              image_feature_map[triplet[1]] = cf.get_features(os.path.join(image_dir, triplet[1] + '.jpg'))
-  #                          if triplet[2] not in image_feature_map:
-  #                              image_feature_map[triplet[2]] = cf.get_features(os.path.join(image_dir, triplet[2] + '.jpg'))
+                    for triplet in triplets:
+                        if os.path.isfile(os.path.join(query_dir, triplet[0] + '.jpg')) and os.path.isfile(os.path.join(image_dir, triplet[1] + '.jpg')) and os.path.isfile(os.path.join(image_dir, triplet[2] + '.jpg')):
+                            if triplet[0] not in image_feature_map:
+                                image_feature_map[triplet[0]] = cf.get_features(os.path.join(query_dir, triplet[0] + '.jpg'))
+                            if triplet[1] not in image_feature_map:
+                                image_feature_map[triplet[1]] = cf.get_features(os.path.join(image_dir, triplet[1] + '.jpg'))
+                            if triplet[2] not in image_feature_map:
+                                image_feature_map[triplet[2]] = cf.get_features(os.path.join(image_dir, triplet[2] + '.jpg'))
 
 
 
@@ -131,9 +172,9 @@ def sample(verticals, output_path, train=True):
                             # print(os.path.join(image_dir, triplet[2] + '.jpg'))
                             # print(os.path.isfile(os.path.join(image_dir, triplet[2] + '.jpg')))
                             # print(triplet[0])
-   #                         pos_count +=1
-   #                     else:
-   #                         count += 1
+                            pos_count +=1
+                        else:
+                            count += 1
 
                     # print('count', count)
                     # print('pos count', pos_count)
@@ -147,16 +188,16 @@ def sample(verticals, output_path, train=True):
                     #     # exit(0)
 
 
-    #                print(image_feature_map.keys())
+                    print(image_feature_map.keys())
                     triplets = [[os.path.join(query_dir, x[0] + ".jpg"), os.path.join(image_dir, x[1] + ".jpg"),
                              os.path.join(image_dir, x[2] + ".jpg"), x[3]] for x in triplets]
                     writer.writerows(triplets)
                     triplets = []
-
+'''
 
 verticals = ['skirts']
 output_path = os.getcwd()
-output_path = os.path.join(output_path,"triplets_skirts_10_sample_new2.csv")
+output_path = os.path.join(output_path,"samples.csv")
 print(output_path)
 
 # exit(0)
