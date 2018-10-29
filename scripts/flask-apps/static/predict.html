@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+
+<html>
+<head>
+	<title>Fashion Lens</title>
+	<link rel="shortcut icon" href="favicon.ico">
+</head>
+<body>
+	<input id="image-selector" type="file">
+	<button id="predict-button">Predict</button>
+	<p id="">Predictions</p>
+	<p>similar images: <span id="my-predict"></span></p>
+	<img id="selected-image" src=""/>
+
+	<script src="http://code.jquery.com/jquery-3.3.1.min.js"></script>
+	<script>
+		
+		let base64Image;
+		let image_id;
+		$("#image-selector").change(function() {
+			let reader = new FileReader();
+			// reader.fileName = file.name
+
+			reader.onload = function(e) {
+				
+				// let filename = file.name;
+				// var file = e.target.file;
+				// let name = document.getElementById("image-selector").name;
+				// var name = reader.readAsDataURL(e.target.files[0])
+				var file = $('#image-selector').prop('files')[0];
+				let dataURL = reader.result;
+				$('#selected-image').attr("src", dataURL);
+				base64Image = dataURL.replace("data:image/jpeg;base64,", "");
+				console.log("next is gonna be the value")
+				// console.log(base64Image);
+				console.log(file.name)
+				image_id = file.name.replace(".jpg","")
+				image_id = parseInt(image_id)
+				console.log(image_id)
+			}
+			reader.readAsDataURL($("#image-selector")[0].files[0]);
+			$("#my-predict").text("");
+		});
+
+		$("#predict-button").click(function(event){
+			let message = {
+				image: base64Image,
+				imageId: image_id
+			}
+			console.log(message);
+			$.post("http://127.0.0.1:5000/predict", JSON.stringify(message), function(response){
+				$("#my-predict").text(getNumbers(response.prediction));
+				// console.log(response.prediction.toArray());
+				console.log(getNumbers(response.prediction));
+				display_images(getNumbers(response.prediction))
+			});
+
+		function getNumbers(inputString){
+			var regex=/\d+\.\d+|\.\d+|\d+/g, 
+        	results = [],
+        	n;
+
+		    while(n = regex.exec(inputString)) {
+		        results.push(parseFloat(n[0]));
+		    }
+
+		    return results;
+		}
+		function display_images(list_of_ids){
+
+			var fileArr = new Array();
+			for (var i = 0; i < list_of_ids.length; i++) {
+				var image_path = "\\static\\structured_images\\skirts\\" + list_of_ids[i].toString() + ".jpg" 
+				console.log(image_path)
+			    var fileEl = "<img src="+image_path+" height=\"100\" width=\"100\"/>";
+			    fileArr.push(fileEl);
+			}
+			var htmlArr = new Array();
+			htmlArr.push("<ul>");
+			for (var z = 0; z < fileArr.length; z++) {
+			    if (z == 0) {
+			        htmlArr.push("<li>");
+			        htmlArr.push("<div>");        
+			    }
+			    if (z !==0 && z % 3 === 0) {
+			        htmlArr.push("</div>");
+			        htmlArr.push("</li>");
+			        htmlArr.push("<li>");
+			        htmlArr.push("<div>");
+			    }
+			    htmlArr.push(fileArr[z]);
+			    if (z == fileArr.length-1) {
+			        htmlArr.push("</div>");
+			        htmlArr.push("</li>");
+			    }
+			}
+			htmlArr.push("</ul>");
+			var htmlOut = htmlArr.join("");
+			$("body").append(htmlOut);
+
+		}
+		  
+
+		
+
+		});
+	</script>
+
+</body>
+</html>
+
+
+
+                        
