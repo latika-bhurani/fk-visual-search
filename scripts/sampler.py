@@ -12,9 +12,9 @@ image_feature_map = {}
 
 
 def sample(verticals, output_path, train=True):
-    base_dir = "."
-    meta_dir = os.path.join(base_dir, "meta", "json")
-    base_image_dir = os.path.join(base_dir, "structured_images")
+    base_dir = "/home/dalbeer/"
+    meta_dir = os.path.join(base_dir, "street2shop_crop", "meta")
+    base_image_dir = os.path.join(base_dir, "street2shop_crop", "structured_images")
     print(base_image_dir)
     # number_of_n = 100
 
@@ -30,12 +30,12 @@ def sample(verticals, output_path, train=True):
         retrieval_path = os.path.join(meta_dir, "retrieval_" + vertical + ".json")
 
         # image_dir = ./structures_images/dresses_256
-        image_dir = os.path.join(base_image_dir, vertical + "_256")
+        image_dir = os.path.join(base_image_dir, vertical)
 
         print(image_dir)
 
         # query_path = ./structred_images/wtbi_dresses_query_crop_256
-        query_dir = os.path.join(base_image_dir, "wtbi_" + vertical + "_query_crop_256")
+        query_dir = os.path.join(base_image_dir, "wtbi_" + vertical + "_query_crop")
 
         # open file train_pari_dresses.json
         with open(os.path.join(meta_dir, filename)) as jsonFile:
@@ -106,48 +106,6 @@ def sample(verticals, output_path, train=True):
 
                     count = 0
                     pos_count = 0
-#                    for triplet in triplets:
- #                       if os.path.isfile(os.path.join(query_dir, triplet[0] + '.jpg')) and os.path.isfile(os.path.join(image_dir, triplet[1] + '.jpg')) and os.path.isfile(os.path.join(image_dir, triplet[2] + '.jpg')):
-  #                          if triplet[0] not in image_feature_map:
-  #                              image_feature_map[triplet[0]] = cf.get_features(os.path.join(query_dir, triplet[0] + '.jpg'))
-  #                          if triplet[1] not in image_feature_map:
-  #                              image_feature_map[triplet[1]] = cf.get_features(os.path.join(image_dir, triplet[1] + '.jpg'))
-  #                          if triplet[2] not in image_feature_map:
-  #                              image_feature_map[triplet[2]] = cf.get_features(os.path.join(image_dir, triplet[2] + '.jpg'))
-
-
-
-
-
-
-
-                            # print('positive')
-                            # print(os.path.join(query_dir, triplet[0] + '.jpg'))
-                            # print(os.path.isfile(os.path.join(query_dir, triplet[0] + '.jpg')))
-                            # print('negative')
-                            # print(os.path.join(image_dir, triplet[1] + '.jpg'))
-                            # print(os.path.isfile(os.path.join(image_dir, triplet[1] + '.jpg')))
-                            # print('random')
-                            # print(os.path.join(image_dir, triplet[2] + '.jpg'))
-                            # print(os.path.isfile(os.path.join(image_dir, triplet[2] + '.jpg')))
-                            # print(triplet[0])
-   #                         pos_count +=1
-   #                     else:
-   #                         count += 1
-
-                    # print('count', count)
-                    # print('pos count', pos_count)
-                    # exit(0)
-
-                    # if len([os.path.join(query_dir, x[0] + ".jpg") for x in triplets]) > 10:
-                    #     print(triplets)
-                    #     exit(0)
-                    #     # print(x[0])
-                    #     # print('its there')
-                    #     # exit(0)
-
-
-    #                print(image_feature_map.keys())
                     triplets = [[os.path.join(query_dir, x[0] + ".jpg"), os.path.join(image_dir, x[1] + ".jpg"),
                              os.path.join(image_dir, x[2] + ".jpg"), x[3]] for x in triplets]
                     writer.writerows(triplets)

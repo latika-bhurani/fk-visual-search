@@ -1,25 +1,18 @@
-'''
-retrieval_data format --> {'photo': 182815, 'product': 10224},
-
-
-
-'''
-
-
 import glob
 import json
 import os
+from pathlib import Path
 
 __author__ = 'ananya.h'
 
-base_dir = os.getcwd()
+base_dir = "/home/dalbeer/"
 # base_dir = "\data\street2shop"
 # this is there
-meta_dir = os.path.join(base_dir, "meta", "json")
+meta_dir = os.path.join(base_dir, "street2shop_crop", "meta", "json")
 # this is there
-image_dir = os.path.join(base_dir, "images")
+image_dir = os.path.join(base_dir, "street2shop_images")
 # this is there
-structured_dir = os.path.join(base_dir, "structured_images")
+structured_dir = os.path.join(base_dir, "street2shop_crop", "structured_images")
 # this is there
 # all_pair_file_paths = glob.glob(meta_dir + "/retrieval_*.json")
 
