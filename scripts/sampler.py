@@ -11,10 +11,10 @@ __author__ = 'ananya.h'
 image_feature_map = {}
 
 
-def sample(verticals, output_path, train=True):
-    base_dir = "/home/dalbeer/"
-    meta_dir = os.path.join(base_dir, "street2shop_crop", "meta")
-    base_image_dir = os.path.join(base_dir, "street2shop_crop", "structured_images")
+def sample(verticals, output_file, train=True):
+    base_dir = "/home/ubuntu/visualsearch/code/fk-visual-search/data/"
+    meta_dir = os.path.join(base_dir, "meta")
+    base_image_dir = os.path.join(base_dir, "structured_images")
     print(base_image_dir)
     # number_of_n = 100
 
@@ -30,12 +30,14 @@ def sample(verticals, output_path, train=True):
         retrieval_path = os.path.join(meta_dir, "retrieval_" + vertical + ".json")
 
         # image_dir = ./structures_images/dresses_256
-        image_dir = os.path.join(base_image_dir, vertical)
+        image_dir = os.path.join(base_image_dir, vertical + "_256")
 
         print(image_dir)
 
+	# include vertical variable in output file
+	output_path = os.path.join(base_dir, output_file)
         # query_path = ./structred_images/wtbi_dresses_query_crop_256
-        query_dir = os.path.join(base_image_dir, "wtbi_" + vertical + "_query_crop")
+        query_dir = os.path.join(base_image_dir, "wtbi_" + vertical + "_query_crop_256")
 
         # open file train_pari_dresses.json
         with open(os.path.join(meta_dir, filename)) as jsonFile:
@@ -113,12 +115,12 @@ def sample(verticals, output_path, train=True):
 
 
 verticals = ['skirts']
-output_path = os.getcwd()
-output_path = os.path.join(output_path,"triplets_skirts_10_sample_new2.csv")
-print(output_path)
+#output_path = "/home/ubuntu/visualsearch/code/fk-visual-search/model"
+#output_path = os.path.join(output_path,"triplets_skirts_10_sample_new2.csv")
+#print(output_path)
 
 # exit(0)
 
 print('started')
-sample(verticals, output_path)
+sample(verticals, "triplets_skirts_10_sample_new2.csv")
 print('ended')

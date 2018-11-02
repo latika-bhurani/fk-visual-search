@@ -24,7 +24,7 @@ class Trainer:
     def __init__(self):
 
         self._alpha = 0.2
-        self.model_path = Path("../../model/fashion_lens_model.h5")
+        self.model_path = "../model/fashion_lens_model.h5"
 
     def build_base_network(self):
 
@@ -33,6 +33,13 @@ class Trainer:
 
         # VGG Layer for high level features
         vgg = VGG16(weights='imagenet', include_top=False)
+	
+	for layer in vgg.layers:
+		layer.trainable = False
+	# make the vgg layers non trainable
+#	for layer in vgg.layers:
+#		layer.trainable = False
+
         vgg = vgg(input)
 
         # Add the fully connected layers on top
@@ -108,19 +115,22 @@ class Trainer:
 
         return fashion_lens_model
 
+
     '''
     Method to train the model on training data batch by batch
     '''
-    def train(self, model, triplet_csv, batch_size = 5):
+    def train(self, model, triplet_csv, batch_size = 32):
 
         tbCallBack = keras.callbacks.TensorBoard(log_dir="../logs/{}".format(time()), histogram_freq=0, write_graph=True,
                                                  write_images=True)
-        total_train_size = 512
+        total_train_size = 1366903
+
+	n_batches = int(total_train_size / batch_size)
 
         print("Start training")
         # testing purpose -- run only 1 batch
-        for batch_num in range(1):
-            triplet_batch = trainer.create_batch(triplet_csv, 1, batch_size)
+        for batch_num in range(n_batches):
+            triplet_batch = trainer.create_batch(triplet_csv, batch_num, batch_size)
 
             query_image, positive_image, negative_image = triplet_batch
             batch_len = len(query_image)
@@ -129,13 +139,13 @@ class Trainer:
             # checkpoint
             filepath = "weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
             checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-            callbacks_list = [checkpoint]
+            # callbacks_list = [checkpoint]
 
             # save final model
             model.fit([query_image, positive_image, negative_image], Y_train, epochs=4, validation_split=0.2, callbacks=[tbCallBack])
 
         # save final model
-        self.model_path.parent.mkdir(parents=True, exist_ok=True)
+        # self.model_path.parent.mkdir(parents=True, exist_ok=True)
         # save the visnet model for generating the feature vectors
         model.save(self.model_path)
 
@@ -153,7 +163,7 @@ class Trainer:
             for row in itertools.islice(csv_reader, batch_number*batch_size, (batch_number+1)*batch_size):
 
                 query_img_path = row[0]
-                print(row[0])
+                # print(row[0])
                 query_img = image.load_img(query_img_path, target_size=(224, 224))
                 query_img_data = image.img_to_array(query_img)
                 query_img_data = np.expand_dims(query_img_data, axis=0)
