@@ -34,8 +34,8 @@ def sample(verticals, output_file, train=True):
 
         print(image_dir)
 
-	# include vertical variable in output file
-	output_path = os.path.join(base_dir, output_file)
+        # include vertical variable in output file
+        output_path = os.path.join(base_dir, output_file)
         # query_path = ./structred_images/wtbi_dresses_query_crop_256
         query_dir = os.path.join(base_image_dir, "wtbi_" + vertical + "_query_crop_256")
 

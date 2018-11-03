@@ -14,7 +14,6 @@ import itertools
 from utils import l2Norm, triplet_loss, euclidean_distance
 from pathlib import Path
 import matplotlib.pyplot as plt
-import pydot
 from time import time
 from keras.callbacks import ModelCheckpoint
 import keras
@@ -33,12 +32,10 @@ class Trainer:
 
         # VGG Layer for high level features
         vgg = VGG16(weights='imagenet', include_top=False)
-	
-	for layer in vgg.layers:
-		layer.trainable = False
-	# make the vgg layers non trainable
-#	for layer in vgg.layers:
-#		layer.trainable = False
+
+        # to make vgg layers non-trainable
+        for layer in vgg.layers:
+            layer.trainable = False
 
         vgg = vgg(input)
 
@@ -125,7 +122,7 @@ class Trainer:
                                                  write_images=True)
         total_train_size = 1366903
 
-	n_batches = int(total_train_size / batch_size)
+        n_batches = int(total_train_size / batch_size)
 
         print("Start training")
         # testing purpose -- run only 1 batch
