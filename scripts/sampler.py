@@ -3,7 +3,7 @@ import json
 import random
 import csv
 import os
-import create_features_vgg16 as cf
+#import create_features_vgg16 as cf
 
 __author__ = 'ananya.h'
 
@@ -13,12 +13,12 @@ image_feature_map = {}
 
 def sample(verticals, output_file, train=True):
     base_dir = "/home/ubuntu/visualsearch/code/fk-visual-search/data/"
-    meta_dir = os.path.join(base_dir, "meta")
+    meta_dir = os.path.join(base_dir, "meta", "json")
     base_image_dir = os.path.join(base_dir, "structured_images")
     print(base_image_dir)
     # number_of_n = 100
 
-    number_of_n = 100
+    number_of_n = 10
 #   number_of_pos_neg_pairs = 3 # this will give out 100*10 triplets ##   !!!!!!!!!!!!!!!! update line 69!!!!!!!!!!!!!!!!!!!!
     prefix = "train" if train else "test"
     for vertical in verticals:
@@ -48,7 +48,7 @@ def sample(verticals, output_file, train=True):
 
         with open(retrieval_path) as jsonFile:
             data = json.load(jsonFile) # {"photo": 163478, "product": 1}
-        
+
 
         for info in data:
             photo_to_product_map[info["photo"]] = info["product"]  # photo : product
@@ -80,7 +80,7 @@ def sample(verticals, output_file, train=True):
 
             for i in product_to_photo_map[product]:
                 p_s.append(i) # list of all the photos of a product
-            
+
 
             triplets = []
             # print(p_s)
@@ -93,12 +93,18 @@ def sample(verticals, output_file, train=True):
                     n_index = random.randint(0, len(universe) - 1)
                     n = universe[n_index]
                     # n_id is any random photo not in the photos we consider
+
                     if n not in p_s and n!=photo:
+
                         n_id = str(n)
-                        # print('triplets len',len(triplets))
-                        # if len(triplets) == number_of_pos_neg_pairs*10:
-                        #     break
-                        triplets.append([q_id, p_id, n_id, vertical])
+                        if os.path.exists(query_dir + "/" + q_id + ".jpg") and os.path.exists(
+                                image_dir + "/" + p_id + ".jpg") and os.path.exists(
+                            image_dir + "/" + n_id + ".jpg"):
+
+                            # print('triplets len',len(triplets))
+                            # if len(triplets) == number_of_pos_neg_pairs*10:
+                            #     break
+                            triplets.append([q_id, p_id, n_id, vertical])
 
                 # print(triplets)
                 # exit(0)
@@ -122,5 +128,5 @@ verticals = ['skirts']
 # exit(0)
 
 print('started')
-sample(verticals, "triplets_skirts_10_sample_new2.csv")
+sample(verticals, "triplets_skirts_10_sample_new.csv")
 print('ended')

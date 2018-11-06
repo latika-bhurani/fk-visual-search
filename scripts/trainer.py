@@ -17,6 +17,7 @@ import matplotlib.pyplot as plt
 from time import time
 from keras.callbacks import ModelCheckpoint
 import keras
+import os
 
 class Trainer:
 
@@ -24,6 +25,7 @@ class Trainer:
 
         self._alpha = 0.2
         self.model_path = "../model/fashion_lens_model.h5"
+        self.triplet_dir = "../data/"
 
     def build_base_network(self):
 
@@ -79,7 +81,7 @@ class Trainer:
     """
     Build main model to train data the data on using triplet loss to minimize
     Model takes the triplets of query, positive and negative image of size (224, 224, 3)
-    as input   
+    as input
     """
     def build_model(self):
 
@@ -116,17 +118,21 @@ class Trainer:
     '''
     Method to train the model on training data batch by batch
     '''
-    def train(self, model, triplet_csv, batch_size = 32):
+    def train(self, model, triplet_csv, batch_size = 64):
 
         tbCallBack = keras.callbacks.TensorBoard(log_dir="../logs/{}".format(time()), histogram_freq=0, write_graph=True,
                                                  write_images=True)
-        total_train_size = 1366903
+        total_train_size = 83852
 
         n_batches = int(total_train_size / batch_size)
 
+        triplet_csv = os.path.join(self.triplet_dir + triplet_csv)
+
         print("Start training")
+        print("Number of batches : ", n_batches)
         # testing purpose -- run only 1 batch
         for batch_num in range(n_batches):
+            print("Batch Num : ", batch_num)
             triplet_batch = trainer.create_batch(triplet_csv, batch_num, batch_size)
 
             query_image, positive_image, negative_image = triplet_batch
@@ -134,12 +140,12 @@ class Trainer:
             Y_train = np.random.randint(2, size=(1, 2, batch_len)).T
 
             # checkpoint
-            filepath = "weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
-            checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
+            #filepath = "weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
+            #checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
             # callbacks_list = [checkpoint]
 
             # save final model
-            model.fit([query_image, positive_image, negative_image], Y_train, epochs=4, validation_split=0.2, callbacks=[tbCallBack])
+            model.fit([query_image, positive_image, negative_image], Y_train, epochs=30, validation_split=0.2, callbacks=[tbCallBack])
 
         # save final model
         # self.model_path.parent.mkdir(parents=True, exist_ok=True)
@@ -159,38 +165,38 @@ class Trainer:
             count = 0
             for row in itertools.islice(csv_reader, batch_number*batch_size, (batch_number+1)*batch_size):
 
-                query_img_path = row[0]
-                # print(row[0])
-                query_img = image.load_img(query_img_path, target_size=(224, 224))
-                query_img_data = image.img_to_array(query_img)
-                query_img_data = np.expand_dims(query_img_data, axis=0)
-                query_img_data = preprocess_input(query_img_data)
-                query_image[count] = query_img_data
+                if (os.path.exists(row[0]) and os.path.exists(row[1]) and os.path.exists(row[2])) :
+                    query_img_path = row[0]
+                    query_img = image.load_img(query_img_path, target_size=(224, 224))
+                    query_img_data = image.img_to_array(query_img)
+                    query_img_data = np.expand_dims(query_img_data, axis=0)
+                    query_img_data = preprocess_input(query_img_data)
+                    query_image[count] = query_img_data
 
-                positive_img_path = row[1]
-                positive_img = image.load_img(positive_img_path, target_size=(224, 224))
-                positive_img_data = image.img_to_array(positive_img)
-                positive_img_data = np.expand_dims(positive_img_data, axis=0)
-                positive_img_data = preprocess_input(positive_img_data)
-                positive_image[count] = positive_img_data
+                    positive_img_path = row[1]
+                    positive_img = image.load_img(positive_img_path, target_size=(224, 224))
+                    positive_img_data = image.img_to_array(positive_img)
+                    positive_img_data = np.expand_dims(positive_img_data, axis=0)
+                    positive_img_data = preprocess_input(positive_img_data)
+                    positive_image[count] = positive_img_data
 
 
-                negative_img_path = row[2]
-                negative_img = image.load_img(negative_img_path, target_size=(224, 224))
-                negative_img_data = image.img_to_array(negative_img)
-                negative_img_data = np.expand_dims(negative_img_data, axis=0)
-                negative_img_data = preprocess_input(negative_img_data)
-                negative_image[count] = negative_img_data
+                    negative_img_path = row[2]
+                    negative_img = image.load_img(negative_img_path, target_size=(224, 224))
+                    negative_img_data = image.img_to_array(negative_img)
+                    negative_img_data = np.expand_dims(negative_img_data, axis=0)
+                    negative_img_data = preprocess_input(negative_img_data)
+                    negative_image[count] = negative_img_data
 
-                count += 1
+                    count += 1
 
         return query_image, positive_image, negative_image
 
 
     '''
-    Visualization for the specified layer 
-    
-    TODO 
+    Visualization for the specified layer
+
+    TODO
         - need to update as per requirement
     '''
     def layer_to_visualize(self, layer, model, image_to_visualize):
@@ -218,4 +224,4 @@ class Trainer:
 
 
 trainer = Trainer()
-trainer.train(trainer.build_model(), 'triplets_skirts_10_sample_new2.csv')
+trainer.train(trainer.build_model(), 'triplets_skirts_10_sample_new.csv')
