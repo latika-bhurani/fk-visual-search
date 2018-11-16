@@ -1,0 +1,38 @@
+{% extends 'layout.html' %}
+{% block body %}
+
+<div class="row">
+    {% for image in images %}
+    <div class="col-lg-3 col-md-4 col-sm-6">
+        <div class="card mb-4">
+            <img class="card-img-top" style="height:200px;width:100%" src="static/{{image.path}}" alt="">
+                
+            <div class="card-body">
+                <h4>{{image.distance}}</h4>
+                <span class="text-warning"></span>
+            </div>
+        </div>
+        <!-- /.card -->
+    </div>
+    {% endfor %}
+</div>
+<!-- <div class="row">
+    <div class="col-xs-4" style="background-color: #f5f5f5;margin: 0px 10px;border-radius: 4px; padding: 10px 20px 20px 20px;">
+        <div style="text-align: center;font-size: 18px;background-color: #ddd;border-radius: 4px;color: #5e5fa4;margin-bottom: 8px;">
+            <span>Users Chart</span>
+        </div>
+        <ul class="list-group">
+            {% for image in images %}
+          
+                 <div class="card mb-4">
+                    <li >
+                        <img class="card-img-top img-fluid" src="static/{{image.path}}" alt="">
+                    </li>
+                </div>
+            {% endfor %}
+        </ul>
+    </div>
+   
+    <div class="col-xs-1"></div>
+</div> -->
+{% endblock %}

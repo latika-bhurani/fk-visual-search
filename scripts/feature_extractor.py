@@ -5,7 +5,6 @@ import cv2
 
 __author__ = 'ananya'
 
-import caffe
 import sys
 
 sys.path.append("..")
@@ -13,67 +12,80 @@ from scipy.misc import imresize
 import numpy as np
 import os
 from datetime import datetime
-
+from keras.models import load_model
+from scripts.utils import triplet_loss, accuracy, l2Norm, euclidean_distance
+from keras.models import Model
+import io
+from keras import backend as K
+import mysql.connector
 
 class FeatureExtractor(object):
-    def __init__(self, path_to_deploy_file, path_to_model_file, input_layer_name="data_q", gpu_mode=True, device_id=1,
-                 height=None, width=None):
-        self.path_to_deploy_file = path_to_deploy_file
+    def __init__(self, path_to_model_file, embedding_layer='visnet_model', height=224, width=224):
         self.path_to_model_file = path_to_model_file
-        if gpu_mode:
-            caffe.set_mode_gpu()
-            caffe.set_device(device_id)
-        else:
-            caffe.set_mode_cpu()
-        self.net = caffe.Net(path_to_deploy_file, path_to_model_file, caffe.TEST)
-        self.input_layer_name = input_layer_name
-        self.height = height or self.net.blobs[self.input_layer_name].data.shape[2]
-        self.width = width or self.net.blobs[self.input_layer_name].data.shape[3]
+        self.embedding_layer = embedding_layer
+        self.height = height
+        self.width = width
+        fashion_lens_model = load_model(self.path_to_model_file, custom_objects= {'triplet_loss':triplet_loss,'accuracy':accuracy, 'l2Norm':l2Norm, 'euclidean_distance':euclidean_distance})
+        print("Model loaded")
+        self.visnet_model = fashion_lens_model.get_layer(embedding_layer)
+        self.visnet_model._make_predict_function()
+        # visnet_model = Model(inputs=fashion_lens_model.input,
+        #                                  outputs=fashion_lens_model.get_layer(layer_name).output)
 
-    def extract_one(self, img_path, layer):
+        # self.visnet_model.summary()
+
+        # self.mydb = mysql.connector.connect(
+        #   host="localhost",
+        #   user="root",
+        #   passwd="root",
+        #   database="fashion_lens"
+        # )
+
+
+    def extract_one(self, path):
         # read colored image
-        img = self.getImageFromPath(img_path)
-        # resize image to the height and weight with "bilinear" --> when we have constant image coloring across
-        resized_img = imresize(img, (self.height, self.width), 'bilinear')
+        # in_memory_file = io.BytesIO()
+        # query_image.save(in_memory_file)
+        # print(query_image)
+        resized_img = None
+        try:
+            img = self.getImageFromPath('static/image/product/' + path)
+            resized_img = imresize(img, (self.height, self.width), 'bilinear')
+        except Exception as e:
+            print("Exception for image", path)
+            traceback.print_exc()
 
-        #transpose
-        transposed_img = np.transpose(resized_img, (2, 0, 1))
+        embedding = self.visnet_model.predict([[resized_img]])
         
-        assert self.net.blobs[self.input_layer_name].data.shape == (1,) + transposed_img.shape
-        self.net.blobs[self.input_layer_name].data[...] = transposed_img
-        self.net.forward()
-        fv = self.net.blobs[layer].data[0].flatten()
-        return fv
+        return embedding[0]
 
-    def extract_batch(self, img_paths, layer):
+    def extract_batch(self, img_paths, index):
         batch_size = len(img_paths)
+
+        print(img_paths)
+        # mycursor = self.mydb.cursor()
+
+        # for i in range(len(img_paths)):
+        #     sql = "INSERT INTO crop_image_vector (id, path) VALUES (%s, %s)"
+        #     val = (i+1, img_paths[i])
+        #     mycursor.execute(sql, val)
+
+        # self.mydb.commit()
         fv_dict = {}
         start_time = datetime.now()
         resized_imgs = []
         for path in img_paths:
             try:
                 img = self.getImageFromPath(path)
+                # print(img)
                 resized_imgs.append(imresize(img, (self.height, self.width), 'bilinear'))
             except Exception as e:
-                print "Exception for image", path
+                print("Exception for image", path)
                 traceback.print_exc()
 
-        transposed_imgs = [np.transpose(x, (2, 0, 1)) for x in resized_imgs]
-        reqd_shape = (batch_size,) + transposed_imgs[0].shape
-        self.net.blobs[self.input_layer_name].reshape(*reqd_shape)
-        self.net.blobs[self.input_layer_name].data[...] = transposed_imgs
-        self.net.forward()
-        fv = self.net.blobs[layer].data
-        count = 0
-        for img_path in img_paths:
-            fv_key = os.path.splitext(os.path.basename(img_path))[0]
-            fv_value = fv[count].flatten()
-            fv_dict[fv_key] = fv_value
-            count += 1
-        end_time = datetime.now()
-        delta = end_time - start_time
-        print("Batch took " + str(delta.total_seconds() * 1000))
-        return fv_dict
+        embedding = self.visnet_model.predict([resized_imgs])
+
+        return embedding
 
     def getImageFromPath(self, path):
         return cv2.imread(path, cv2.IMREAD_COLOR)
