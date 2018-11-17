@@ -54,10 +54,10 @@
                     <span class="sr-only">Next</span>
                 </a>
             </div> -->
-            <h3><a href="/tshirt">T-Shirt</a></h3>
+            <h3><a href="/skirt">Skirts</a></h3>
             <div class="row">
                 {% for product in tshirt %}
-                {% if product.category == 'tshirt' %}
+                {% if product.category == 'skirt' %}
                 <div class="col-lg-3 col-md-4 col-sm-6">
                     <div class="card mb-4">
                         <a href="/{{product.category}}?view={{product.id}}">
@@ -77,7 +77,7 @@
             </div>
             <!-- /.row -->
             
-            <h3><a href="/wallet">Wallet</a></h3>
+            <h3><a href="/top">Tops</a></h3>
             <div class="row">
                 {% for product in wallet %}
                 <div class="col-lg-3 col-md-4 col-sm-6">
@@ -97,7 +97,7 @@
                 {% endfor %}
             </div>
             <!-- /.row -->
-            <h3><a href="/belt">Belt</a></h3>
+            <h3><a href="/dress">Dresses</a></h3>
             <div class="row">
                 {% for product in belt %}
                 <div class="col-lg-3 col-md-4 col-sm-6">

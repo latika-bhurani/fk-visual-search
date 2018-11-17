@@ -224,4 +224,5 @@ class Trainer:
 
 
 trainer = Trainer()
+# print('hi')
 trainer.train(trainer.build_model(), 'triplets_skirts_10_sample_new.csv')

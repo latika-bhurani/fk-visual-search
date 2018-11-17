@@ -16,7 +16,7 @@
         <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
         
     </head>
-    <body style="background-image: url({{ url_for('static', filename='image/') }}); margin-top: 57px">
+    <body style="background-image: url({{ url_for('static', filename='image/') }}); margin-top: 57px; background-color: #E0E0E0 ">
         {% include 'includes/_navbar.html' %}
         <div class="container">
             {% block body %}  {% endblock %}

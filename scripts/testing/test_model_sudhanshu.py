@@ -1,6 +1,6 @@
 from keras.layers import concatenate
 from keras.models import Model
-from keras.layers import Input, Merge
+from keras.layers import Input
 from keras.layers.core import Dense
 from keras.layers.merge import concatenate
 
@@ -41,7 +41,7 @@ model.compile(optimizer='adam',
               metrics=['accuracy'])
 
 # Always a good idea to verify it looks as you expect it to 
-# model.summary()
+model.summary()
 
 data = [[1,2,3], [1,1,3], [7,8,9], [5,8,10]]
 labels = [0,0,1,1]

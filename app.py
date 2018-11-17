@@ -12,8 +12,11 @@ from wtforms.fields.html5 import EmailField
 from flask.json import jsonify
 # from werkzeug.utils import secure_filename
 
+import sys
 from annoy import AnnoyIndex
 from scripts.feature_extractor import FeatureExtractor
+
+# sys.settrace(FeatureExtractor)
 
 app = Flask(__name__)
 app.secret_key = os.urandom(24)
@@ -25,7 +28,7 @@ configure_uploads(app, photos)
 mysql = MySQL()
 app.config['MYSQL_HOST'] = 'localhost'
 app.config['MYSQL_USER'] = 'root'
-app.config['MYSQL_PASSWORD'] = 'root'
+app.config['MYSQL_PASSWORD'] = ''
 app.config['MYSQL_DB'] = 'fashion_lens'
 app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 
@@ -33,7 +36,7 @@ app.config['MYSQL_CURSORCLASS'] = 'DictCursor'
 mysql.init_app(app)
 
 model_path = 'scripts/data/model/fashion_lens_model.h5'
-feature_extractor = FeatureExtractor(model_path)
+# feature_extractor = FeatureExtractor(model_path)
 search_index = AnnoyIndex(4096, 'euclidean')
 search_index.load('scripts/data/indices/skirts_ann_index.ann')      
 
@@ -130,13 +133,13 @@ def index():
     # Create cursor
     cur = mysql.connection.cursor()
     # Get message
-    values = 'tshirt'
+    values = 'skirt'
     cur.execute("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", (values,))
     tshirt = cur.fetchall()
-    values = 'wallet'
+    values = 'top'
     cur.execute("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", (values,))
     wallet = cur.fetchall()
-    values = 'belt'
+    values = 'dress'
     cur.execute("SELECT * FROM products WHERE category=%s ORDER BY RAND() LIMIT 4", (values,))
     belt = cur.fetchall()
     values = 'shoes'
@@ -330,7 +333,7 @@ def tshirt():
     # Create cursor
     cur = mysql.connection.cursor()
     # Get message
-    values = 'tshirt'
+    values = 'skirt'
     cur.execute("SELECT * FROM products WHERE category=%s ORDER BY id ASC", (values,))
     products = cur.fetchall()
     # Close Connection
@@ -396,6 +399,7 @@ def tshirt():
         x = content_based_filtering(product_id)
         return render_template('order_product.html', x=x, tshirts=product, form=form)
     return render_template('tshirt.html', tshirt=products, form=form)
+
 
 
 @app.route('/wallet', methods=['GET', 'POST'])
@@ -515,6 +519,214 @@ def belt():
         x = content_based_filtering(product_id)
         return render_template('order_product.html', x=x, tshirts=product, form=form)
     return render_template('belt.html', belt=products, form=form)
+
+
+## ----------------- NEW ADDED -------------------------
+
+@app.route('/skirt', methods=['GET', 'POST'])
+def skirt():
+    form = OrderForm(request.form)
+    # Create cursor
+    cur = mysql.connection.cursor()
+    # Get message
+    values = 'skirt'
+    cur.execute("SELECT * FROM products WHERE category=%s ORDER BY id ASC", (values,))
+    products = cur.fetchall()
+    # Close Connection
+    cur.close()
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        mobile = form.mobile_num.data
+        order_place = form.order_place.data
+        quantity = form.quantity.data
+        pid = request.args['order']
+        now = datetime.datetime.now()
+        week = datetime.timedelta(days=7)
+        delivery_date = now + week
+        now_time = delivery_date.strftime("%y-%m-%d %H:%M:%S")
+        # Create Cursor
+        curs = mysql.connection.cursor()
+        if 'uid' in session:
+            uid = session['uid']
+            curs.execute("INSERT INTO orders(uid, pid, ofname, mobile, oplace, quantity, ddate) "
+                         "VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                         (uid, pid, name, mobile, order_place, quantity, now_time))
+        else:
+            curs.execute("INSERT INTO orders(pid, ofname, mobile, oplace, quantity, ddate) "
+                         "VALUES(%s, %s, %s, %s, %s, %s)",
+                         (pid, name, mobile, order_place, quantity, now_time))
+        # Commit cursor
+        mysql.connection.commit()
+
+        # Close Connection
+        cur.close()
+
+        flash('Order successful', 'success')
+        return render_template('skirt.html', tshirt=products, form=form)
+    if 'view' in request.args:
+        product_id = request.args['view']
+        curso = mysql.connection.cursor()
+        curso.execute("SELECT * FROM products WHERE id=%s", (product_id,))
+        product = curso.fetchall()
+        x = content_based_filtering(product_id)
+        wrappered = wrappers(content_based_filtering, product_id)
+        execution_time = timeit.timeit(wrappered, number=0)
+        print('Execution time: ' + str(execution_time) + ' usec')
+        if 'uid' in session:
+            uid = session['uid']
+            # Create cursor
+            cur = mysql.connection.cursor()
+            cur.execute("SELECT * FROM product_view WHERE user_id=%s AND product_id=%s", (uid, product_id))
+            result = cur.fetchall()
+            if result:
+                now = datetime.datetime.now()
+                now_time = now.strftime("%y-%m-%d %H:%M:%S")
+                cur.execute("UPDATE product_view SET date=%s WHERE user_id=%s AND product_id=%s",
+                            (now_time, uid, product_id))
+            else:
+                cur.execute("INSERT INTO product_view(user_id, product_id) VALUES(%s, %s)", (uid, product_id))
+                mysql.connection.commit()
+        return render_template('view_product.html', x=x, tshirts=product)
+    elif 'order' in request.args:
+        product_id = request.args['order']
+        curso = mysql.connection.cursor()
+        curso.execute("SELECT * FROM products WHERE id=%s", (product_id,))
+        product = curso.fetchall()
+        x = content_based_filtering(product_id)
+        return render_template('order_product.html', x=x, tshirts=product, form=form)
+    return render_template('skirt.html', tshirt=products, form=form)
+
+
+
+@app.route('/top', methods=['GET', 'POST'])
+def top():
+    form = OrderForm(request.form)
+    # Create cursor
+    cur = mysql.connection.cursor()
+    # Get message
+    values = 'top'
+    cur.execute("SELECT * FROM products WHERE category=%s ORDER BY id ASC", (values,))
+    products = cur.fetchall()
+    # Close Connection
+    cur.close()
+
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        mobile = form.mobile_num.data
+        order_place = form.order_place.data
+        quantity = form.quantity.data
+        pid = request.args['order']
+
+        now = datetime.datetime.now()
+        week = datetime.timedelta(days=7)
+        delivery_date = now + week
+        now_time = delivery_date.strftime("%y-%m-%d %H:%M:%S")
+        # Create Cursor
+        curs = mysql.connection.cursor()
+        if 'uid' in session:
+            uid = session['uid']
+            curs.execute("INSERT INTO orders(uid, pid, ofname, mobile, oplace, quantity, ddate) "
+                         "VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                         (uid, pid, name, mobile, order_place, quantity, now_time))
+        else:
+            curs.execute("INSERT INTO orders(pid, ofname, mobile, oplace, quantity, ddate) "
+                         "VALUES(%s, %s, %s, %s, %s, %s)",
+                         (pid, name, mobile, order_place, quantity, now_time))
+        # Commit cursor
+        mysql.connection.commit()
+        # Close Connection
+        cur.close()
+
+        flash('Order successful', 'success')
+        return render_template('top.html', wallet=products, form=form)
+    if 'view' in request.args:
+        q = request.args['view']
+        product_id = q
+        x = content_based_filtering(product_id)
+        curso = mysql.connection.cursor()
+        curso.execute("SELECT * FROM products WHERE id=%s", (q,))
+        products = curso.fetchall()
+        return render_template('view_product.html', x=x, tshirts=products)
+    elif 'order' in request.args:
+        product_id = request.args['order']
+        curso = mysql.connection.cursor()
+        curso.execute("SELECT * FROM products WHERE id=%s", (product_id,))
+        product = curso.fetchall()
+        x = content_based_filtering(product_id)
+        return render_template('order_product.html', x=x, tshirts=product, form=form)
+    return render_template('top.html', wallet=products, form=form)
+
+
+@app.route('/dress', methods=['GET', 'POST'])
+def dress():
+    form = OrderForm(request.form)
+    # Create cursor
+    cur = mysql.connection.cursor()
+    # Get message
+    values = 'dress'
+    cur.execute("SELECT * FROM products WHERE category=%s ORDER BY id ASC", (values,))
+    products = cur.fetchall()
+    # Close Connection
+    cur.close()
+
+    if request.method == 'POST' and form.validate():
+        name = form.name.data
+        mobile = form.mobile_num.data
+        order_place = form.order_place.data
+        quantity = form.quantity.data
+        pid = request.args['order']
+        now = datetime.datetime.now()
+        week = datetime.timedelta(days=7)
+        delivery_date = now + week
+        now_time = delivery_date.strftime("%y-%m-%d %H:%M:%S")
+        # Create Cursor
+        curs = mysql.connection.cursor()
+        if 'uid' in session:
+            uid = session['uid']
+            curs.execute("INSERT INTO orders(uid, pid, ofname, mobile, oplace, quantity, ddate) "
+                         "VALUES(%s, %s, %s, %s, %s, %s, %s)",
+                         (uid, pid, name, mobile, order_place, quantity, now_time))
+        else:
+            curs.execute("INSERT INTO orders(pid, ofname, mobile, oplace, quantity, ddate) "
+                         "VALUES(%s, %s, %s, %s, %s, %s)",
+                         (pid, name, mobile, order_place, quantity, now_time))
+
+        # Commit cursor
+        mysql.connection.commit()
+
+        # Close Connection
+        cur.close()
+
+        flash('Order successful', 'success')
+        return render_template('dress.html', belt=products, form=form)
+    if 'view' in request.args:
+        q = request.args['view']
+        product_id = q
+        x = content_based_filtering(product_id)
+        curso = mysql.connection.cursor()
+        curso.execute("SELECT * FROM products WHERE id=%s", (q,))
+        products = curso.fetchall()
+        return render_template('view_product.html', x=x, tshirts=products)
+    elif 'order' in request.args:
+        product_id = request.args['order']
+        curso = mysql.connection.cursor()
+        curso.execute("SELECT * FROM products WHERE id=%s", (product_id,))
+        product = curso.fetchall()
+        x = content_based_filtering(product_id)
+        return render_template('order_product.html', x=x, tshirts=product, form=form)
+    return render_template('dress.html', belt=products, form=form)
+
+## --------------------------------------------------------------------------------------
+
+
+
+
+
+
+
+
+
+
 
 
 @app.route('/shoes', methods=['GET', 'POST'])
@@ -959,38 +1171,38 @@ def developer():
     else:
         return render_template('developer.html', form=form)
 
-@app.route('/search-by-image', methods=['POST'])
-def image_search():
-    file = request.files['picture']
+# @app.route('/search-by-image', methods=['POST'])
+# def image_search():
+#     file = request.files['picture']
 
-    photos.save(file)
-    print("Get image vector")
-    query_image_vector = feature_extractor.extract_one(file.filename)
+#     photos.save(file)
+#     print("Get image vector")
+#     query_image_vector = feature_extractor.extract_one(file.filename)
 
-    print("Get nearest neighbours")
-    nearest_neightbours = search_index.get_nns_by_vector(query_image_vector, 5, include_distances = True)
+#     print("Get nearest neighbours")
+#     nearest_neightbours = search_index.get_nns_by_vector(query_image_vector, 5, include_distances = True)
     
-    # build nn map
-    nn_map = {}
-    for i, neighbour in enumerate(nearest_neightbours[0]):
-        nn_map[neighbour] = nearest_neightbours[1][i]
+#     # build nn map
+#     nn_map = {}
+#     for i, neighbour in enumerate(nearest_neightbours[0]):
+#         nn_map[neighbour] = nearest_neightbours[1][i]
 
-    print(nearest_neightbours)
-    cur = mysql.connection.cursor()
-    placeholders = ','.join((str(x) for x in nearest_neightbours[0]))
-    query = 'SELECT id, path FROM image_vector WHERE id IN (%s)' % placeholders
-    cur.execute(query)
-    result = cur.fetchall()
-    images_to_return = []
+#     print(nearest_neightbours)
+#     cur = mysql.connection.cursor()
+#     placeholders = ','.join((str(x) for x in nearest_neightbours[0]))
+#     query = 'SELECT id, path FROM image_vector WHERE id IN (%s)' % placeholders
+#     cur.execute(query)
+#     result = cur.fetchall()
+#     images_to_return = []
 
-    for rec in result:
-        temp_image = {}     
-        temp_image['id'] = rec['id']
-        temp_image['path'] = rec['path']
-        temp_image['distance'] = nn_map[rec['id']]
-        images_to_return.append(temp_image)
+#     for rec in result:
+#         temp_image = {}     
+#         temp_image['id'] = rec['id']
+#         temp_image['path'] = rec['path']
+#         temp_image['distance'] = nn_map[rec['id']]
+#         images_to_return.append(temp_image)
 
-    return render_template('search_results.html', images=images_to_return)
+#     return render_template('search_results.html', images=images_to_return)
 
 if __name__ == '__main__':
     app.run(debug=True)

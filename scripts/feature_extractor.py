@@ -3,8 +3,6 @@ import traceback
 
 import cv2
 
-__author__ = 'ananya'
-
 import sys
 
 sys.path.append("..")
@@ -13,7 +11,8 @@ import numpy as np
 import os
 from datetime import datetime
 from keras.models import load_model
-from scripts.utils import triplet_loss, accuracy, l2Norm, euclidean_distance
+# from keras.models 
+from scripts.my_utils import triplet_loss, accuracy, l2Norm, euclidean_distance
 from keras.models import Model
 import io
 from keras import backend as K
@@ -26,6 +25,7 @@ class FeatureExtractor(object):
         self.height = height
         self.width = width
         fashion_lens_model = load_model(self.path_to_model_file, custom_objects= {'triplet_loss':triplet_loss,'accuracy':accuracy, 'l2Norm':l2Norm, 'euclidean_distance':euclidean_distance})
+        # fashion_lens_model = load_weights(self.path_to_model_file)
         print("Model loaded")
         self.visnet_model = fashion_lens_model.get_layer(embedding_layer)
         self.visnet_model._make_predict_function()
