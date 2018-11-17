@@ -1171,38 +1171,38 @@ def developer():
     else:
         return render_template('developer.html', form=form)
 
-# @app.route('/search-by-image', methods=['POST'])
-# def image_search():
-#     file = request.files['picture']
+@app.route('/search-by-image', methods=['POST'])
+def image_search():
+    file = request.files['picture']
 
-#     photos.save(file)
-#     print("Get image vector")
-#     query_image_vector = feature_extractor.extract_one(file.filename)
+    photos.save(file)
+    print("Get image vector")
+    query_image_vector = feature_extractor.extract_one(file.filename)
 
-#     print("Get nearest neighbours")
-#     nearest_neightbours = search_index.get_nns_by_vector(query_image_vector, 5, include_distances = True)
+    print("Get nearest neighbours")
+    nearest_neightbours = search_index.get_nns_by_vector(query_image_vector, 5, include_distances = True)
     
-#     # build nn map
-#     nn_map = {}
-#     for i, neighbour in enumerate(nearest_neightbours[0]):
-#         nn_map[neighbour] = nearest_neightbours[1][i]
+    # build nn map
+    nn_map = {}
+    for i, neighbour in enumerate(nearest_neightbours[0]):
+        nn_map[neighbour] = nearest_neightbours[1][i]
 
-#     print(nearest_neightbours)
-#     cur = mysql.connection.cursor()
-#     placeholders = ','.join((str(x) for x in nearest_neightbours[0]))
-#     query = 'SELECT id, path FROM image_vector WHERE id IN (%s)' % placeholders
-#     cur.execute(query)
-#     result = cur.fetchall()
-#     images_to_return = []
+    print(nearest_neightbours)
+    cur = mysql.connection.cursor()
+    placeholders = ','.join((str(x) for x in nearest_neightbours[0]))
+    query = 'SELECT id, path FROM image_vector WHERE id IN (%s)' % placeholders
+    cur.execute(query)
+    result = cur.fetchall()
+    images_to_return = []
 
-#     for rec in result:
-#         temp_image = {}     
-#         temp_image['id'] = rec['id']
-#         temp_image['path'] = rec['path']
-#         temp_image['distance'] = nn_map[rec['id']]
-#         images_to_return.append(temp_image)
+    for rec in result:
+        temp_image = {}     
+        temp_image['id'] = rec['id']
+        temp_image['path'] = rec['path']
+        temp_image['distance'] = nn_map[rec['id']]
+        images_to_return.append(temp_image)
 
-#     return render_template('search_results.html', images=images_to_return)
+    return render_template('search_results.html', images=images_to_return)
 
 if __name__ == '__main__':
     app.run(debug=True)

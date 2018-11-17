@@ -41,6 +41,23 @@ $(function() {
     }
 });
 
+$(function() {
+    $('#upload-file-btn').click(function() {
+        var form_data = new FormData($('#upload-file')[0]);
+        $.ajax({
+            type: 'POST',
+            url: '/search-by-image',
+            data: form_data,
+            contentType: false,
+            cache: false,
+            processData: false,
+            success: function(data) {
+                console.log('Success!');
+                $('#similar_results').html(data)
+            },
+        });
+    });
+});
 // $(function() {
 //     $('#search_image').click(function() {
 

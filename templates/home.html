@@ -5,14 +5,23 @@
         <!-- /.col-lg-3 -->
         <div class="col-lg-12">
 
-            <form id ="name_form" role="form" enctype=multipart/form-data class="" action="/search-by-image"
-                                  method="post">
-                <div class="form-group">
+            <form id ="upload-file" role="form" enctype=multipart/form-data>
+                <div class="form-group"><!-- 
                     <label>Upload Image to search</label>
                     <input type="file" required="required" name="picture">
                 </div>
-                <button type="submit" class="btn btn-default">Submit</button>
+                <button type="submit" class="btn btn-default", id="upload-file-btn">Submit</button> -->
+                <fieldset>
+                    <label for="file">Upload Image to search</label>
+                    <input name="file" type="file">
+                </fieldset>
+                <fieldset>
+                    <button id="upload-file-btn" type="button">Upload</button>
+                </fieldset>
             </form>
+            
+            <div id = "similar_results">
+            </div>
 <!--             <div id="carouselExampleIndicators" class="carousel slide my-4" data-ride="carousel">
                 <ol class="carousel-indicators">
                     <li data-target="#carouselExampleIndicators" data-slide-to="0" class="active"></li>
