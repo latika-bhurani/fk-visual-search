@@ -12,9 +12,6 @@ import lmdb
 import sys
 import math
 
-__author__ = 'ananya.h'
-
-
 def construct_fv_map_from_lmdbs(crops_index_path, catalog_index_path):
     crops_env = lmdb.open(crops_index_path)
     catalog_env = lmdb.open(catalog_index_path)

@@ -3,9 +3,7 @@ import json
 import os
 from pathlib import Path
 
-__author__ = 'ananya.h'
-
-base_dir = "/home/dalbeer/"
+base_dir = "/home/ubuntu/"
 # base_dir = "\data\street2shop"
 # this is there
 meta_dir = os.path.join(base_dir, "street2shop_crop", "meta", "json")

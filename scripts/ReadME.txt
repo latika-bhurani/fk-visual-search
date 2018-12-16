@@ -9,12 +9,6 @@ Create_structured_images --> create symlinks into folders under structured_image
 create_wtbi_crops --> create folders and cropped images under the folders in structured_images
 
 sampler --> create csv of triplets
+trainer ---> builds the model
 
-create_features_vgg16 --> change the imput images to corresponding flatten 4096 embeddings
-
-
-
-
-
-install keras
-h5py
+app.py --> runs the application server

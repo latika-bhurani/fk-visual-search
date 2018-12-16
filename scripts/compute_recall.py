@@ -3,8 +3,6 @@ import os
 import sys
 import lmdb
 
-__author__ = 'ananya.h'
-
 
 def compute_recall(vertical, path_to_nn_lmdb, k_s=[1, 3, 5, 10, 20]):
     env = lmdb.open(path_to_nn_lmdb)

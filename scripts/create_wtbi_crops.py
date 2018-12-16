@@ -3,8 +3,6 @@ import json
 import os
 import cv2
 
-__author__ = 'ananya.h'
-
 
 base_dir = os.getcwd()
 # base_dir = "\data\street2shop"

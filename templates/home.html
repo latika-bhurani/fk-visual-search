@@ -4,23 +4,25 @@
 
         <!-- /.col-lg-3 -->
         <div class="col-lg-12">
-
-            <form id ="upload-file" role="form" enctype=multipart/form-data>
-                <div class="form-group"><!-- 
-                    <label>Upload Image to search</label>
-                    <input type="file" required="required" name="picture">
-                </div>
-                <button type="submit" class="btn btn-default", id="upload-file-btn">Submit</button> -->
-                <fieldset>
-                    <label for="file">Upload Image to search</label>
-                    <input name="file" type="file">
-                </fieldset>
-                <fieldset>
-                    <button id="upload-file-btn" type="button">Upload</button>
-                </fieldset>
-            </form>
+           <!--  <div class="col-lg-3" style="background: url('static/image/Fashion-PNG-Image.png'); background-repeat:no-repeat; background-size: cover; height:200px;width:100% "> -->
+            <div style="background: url('static/image/MAVEN46-nyfw-ss16-street-style-feature.jpg'); background-repeat:no-repeat; background-size: cover; height:300;width:100% ">
+                
+                <div style="height:300" class="box">
+                <form id ="upload-file" role="form" enctype=multipart/form-data>
+                    
+                    <fieldset>
+                        <label for="file">Upload Image to search</label>
+                        <input name="picture" type="file" id="upload-file-btn">
+                    </fieldset>
+                 <!--    <fieldset>
+                        <button id="upload-file-btn" type="button">Upload</button>
+                    </fieldset> -->
+                </form>
+            </div>
             
-            <div id = "similar_results">
+            </div>
+            <!-- <div id="overlay" class="hide"></div> -->
+            <div id = "search_results" style="margin-top:20px">
             </div>
 <!--             <div id="carouselExampleIndicators" class="carousel slide my-4" data-ride="carousel">
                 <ol class="carousel-indicators">
@@ -75,7 +77,7 @@
                         </a>
                         <div class="card-body">
                             <h5><a class="card-title" href="javascript:void();">{{ product.pName}}</a></h5>
-                            <h4>৳{{product.price}}</h4>
+                            <h4>${{product.price}}</h4>
                             <span class="text-warning"></span>
                         </div>
                     </div>
@@ -97,7 +99,7 @@
                         </a>
                         <div class="card-body">
                             <h5><a class="card-title" id="" href="/{{product.category}}?view={{product.id}}">{{ product.pName}}</a></h5>
-                            <h4>৳{{product.price}}</h4>
+                            <h4>${{product.price}}</h4>
                             <span class="text-warning"></span>
                         </div>
                     </div>

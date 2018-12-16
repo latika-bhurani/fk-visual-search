@@ -5,8 +5,6 @@ import csv
 import os
 #import create_features_vgg16 as cf
 
-__author__ = 'ananya.h'
-
 # dictionary to hold features of the images
 image_feature_map = {}
 
@@ -53,7 +51,6 @@ def sample(verticals, output_file, train=True):
         for info in data:
             photo_to_product_map[info["photo"]] = info["product"]  # photo : product
 
-
         product_to_photo_map = {}
 
         for photo in photo_to_product_map:
@@ -69,9 +66,6 @@ def sample(verticals, output_file, train=True):
                     glob.glob(image_dir + "/*.jpg")]
 
 
-        # print(len(pairs))
-        # exit(0)
-
         for pair in pairs:
             photo = pair["photo"]
             product = pair["product"]
@@ -80,7 +74,6 @@ def sample(verticals, output_file, train=True):
 
             for i in product_to_photo_map[product]:
                 p_s.append(i) # list of all the photos of a product
-
 
             triplets = []
             # print(p_s)

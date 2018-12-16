@@ -8,10 +8,6 @@ from io import StringIO
 import traceback
 from pathlib import Path
 
-# data_folder = Path("source_data/text_files/")
-
-
-__author__ = "ananya.h"
 
 class URLObject(object):
     def __init__(self,id,url):
@@ -55,8 +51,6 @@ class ParallelImageDownloader(object):
 
 if __name__ == "__main__":
     try:
-        # url_file_path = "C:/Users/DarkMatter/Desktop/CS594-AI-Innovations/FlipkartImplemetation/fk-visual-search-master/scripts/photos/photos.txt"
-        # url_file_path = Path("C:/Users/DarkMatter/Desktop/CS594-AI-Innovations/FlipkartImplemetation/fk-visual-search-master/scripts/photos/photos.txt")
         dst_dir = "C:/Users/DarkMatter/Desktop/CS594-AI-Innovations/FlipkartImplemetation/fk-visual-search-master/scripts/data/street2shop/images"
         images_downloaded = os.listdir(dst_dir)
         ids_downloaded = set([ x.split(".")[0] for x in images_downloaded])

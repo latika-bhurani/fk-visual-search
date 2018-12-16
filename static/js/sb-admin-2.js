@@ -42,8 +42,9 @@ $(function() {
 });
 
 $(function() {
-    $('#upload-file-btn').click(function() {
+    $('#upload-file-btn').change(function() {
         var form_data = new FormData($('#upload-file')[0]);
+        // $('#overlay').removeClass('hide');
         $.ajax({
             type: 'POST',
             url: '/search-by-image',
@@ -53,7 +54,8 @@ $(function() {
             processData: false,
             success: function(data) {
                 console.log('Success!');
-                $('#similar_results').html(data)
+                $('#search_results').html(data)
+                // $('#overlay').addClass('hide');
             },
         });
     });

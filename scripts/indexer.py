@@ -22,9 +22,6 @@ class Indexer(object):
         batch_num = 0
         if not stop_index:
             stop_index = len(batches)
-        # batches = batches[start_index:stop_index]
-        # for batch in batches:
-        # batch_num += 1
         # print("Indexing batch " batch_num, len(batch))
         fv_dict = self.feature_extractor.extract_batch(batches[0], self.search_index)
 

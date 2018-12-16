@@ -139,17 +139,10 @@ class Trainer:
             batch_len = len(query_image)
             Y_train = np.random.randint(2, size=(1, 2, batch_len)).T
 
-            # checkpoint
-            #filepath = "weights-improvement-{epoch:02d}-{val_acc:.2f}.hdf5"
-            #checkpoint = ModelCheckpoint(filepath, monitor='val_acc', verbose=1, save_best_only=True, mode='max')
-            # callbacks_list = [checkpoint]
-
             # save final model
             model.fit([query_image, positive_image, negative_image], Y_train, epochs=30, validation_split=0.2, callbacks=[tbCallBack])
 
         # save final model
-        # self.model_path.parent.mkdir(parents=True, exist_ok=True)
-        # save the visnet model for generating the feature vectors
         model.save(self.model_path)
 
     # TODO
@@ -224,5 +217,4 @@ class Trainer:
 
 
 trainer = Trainer()
-# print('hi')
 trainer.train(trainer.build_model(), 'triplets_skirts_10_sample_new.csv')

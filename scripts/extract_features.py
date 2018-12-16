@@ -3,10 +3,6 @@ import os
 import sys
 from indexer import Indexer
 
-__author__ = 'ananya.h'
-
-
-
 if __name__ == "__main__":
     args = sys.argv[1:]
     if len(args) < 1:
